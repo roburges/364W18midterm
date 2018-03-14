@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<ul>
+{% for i in blogs %}
+    <li><strong>{{ i[1].tickerD }}: {{ i[0].date }}<br></strong><i></i> {{ i[0].blog }}</li><br><br>
+{% endfor %}
+</ul>
+
+{% if not blogs %}
+    There are no blogs yet
+{% endif %}
+
+<!-- The below is code from discussion -->
+<div>
+{% for message in get_flashed_messages() %}
+    <strong>*** {{ message }} ***</strong>
+{% endfor %}
+</div>
+
+{% endblock %}

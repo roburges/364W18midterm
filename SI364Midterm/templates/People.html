@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>All Bloggers:</h2>
+
+<ul>
+{% for n in names %}
+    <li><strong>{{ n.username }}<br></strong>
+{% endfor %}
+</ul>
+
+{% if not names %}
+  There are no bloggers yet
+{% endif %}
+
+
+<div>
+{% for message in get_flashed_messages() %}
+    <strong>*** {{ message }} ***</strong>
+{% endfor %}
+</div>
+
+{% endblock %}
