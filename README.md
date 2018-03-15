@@ -21,11 +21,11 @@ o	These could be in the same template, and could be 1 of the 2 additional templa
 
 **Extra 200 PT. Requirements**
 
-**•	(100 points) Include an additional model class (to make at least 4 total in the application) with at least 3 columns. Save data to it AND query data from it; use the data you query in a view-function, and as a result of querying that data, something should show up in a view. (The data itself should show up, OR the result of a request made with the data should show up.)  **
+**•	(100 points) Include an additional model class (to make at least 4 total in the application) with at least 3 columns. Save data to it AND query data from it; use the data you query in a view-function, and as a result of querying that data, something should show up in a view. (The data itself should show up, OR the result of a request made with the data should show up.)**
 
 A piece of this requirement can be seen in my custom date input into what the user wants a quote for on the specific stock. This can also be seen in the login form that then allows the user to access the home page in order to use the app. The password is queried as well allowing access.
 
-•	**(100 points) Write code in your Python file that will allow a user to submit duplicate data to a form, but will not save duplicate data (like the same user should not be able to submit the exact same tweet text for HW3). **
+•	**(100 points) Write code in your Python file that will allow a user to submit duplicate data to a form, but will not save duplicate data (like the same user should not be able to submit the exact same tweet text for HW3).**
 
 This is seen in most of my data within the home function using if else statements that queries all said data and recognizes repeats via id’s or foreign Id’s and redirects the user to a page where they can see all data, thus their desired input. 
 
