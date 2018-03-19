@@ -2,8 +2,11 @@
 
 {% block content %}
 <ul>
-{% for i in blogs %}
-    <li><strong>{{ i[1].tickerD }}: {{ i[0].date }}<br></strong><i></i> {{ i[0].blog }}</li><br><br>
+{% for b in blogs %}
+    <h4> Highest price on {{b[0].date}}: {{ final }} <h4>
+    <h4> Lowest price on {{b[0].date}}: {{ final_low }} <h4>
+    <li><strong>{{ b[1].tickerD }}:<br> stock info for date: {{ b[0].date }}<br></strong><i></i>{{username}}'s {{ b[0].blog }}</li><br><br>
+
 {% endfor %}
 </ul>
 

@@ -1,0 +1,21 @@
+<!-- practically I would not have use extends here as the links are not necessary because it is a login page; however, I have use extends to abide by assignment requirements -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{{ url_for('home') }}" methods="GET">
+    {{ form.username.label }}
+    {{ form.username }} <br>
+
+    {{ form.pword.label }}
+    {{ form.pword}} <br>
+
+    {{form.email.label}}
+    {{form.email}}<br>
+
+    {{ form.submit }}
+</form>
+
+
+{% endblock %}

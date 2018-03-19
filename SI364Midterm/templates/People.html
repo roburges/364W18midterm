@@ -5,12 +5,16 @@
 
 <ul>
 {% for n in names %}
-    <li><strong>{{ n.username }}<br></strong>
+    <li><strong>{{ n.username }} {{n}}<br></strong>
+
+  <p>  <a  href="{{ url_for('index')}}">If you had trouble with your login combo click here to try again! </a><p><br>
 {% endfor %}
 </ul>
 
 {% if not names %}
-  There are no bloggers yet
+  There are no bloggers yet<br>
+
+  <a href="{{ url_for('index')}}"> be the first one!!</a> <br>
 {% endif %}
 
 

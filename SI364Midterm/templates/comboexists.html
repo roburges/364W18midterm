@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h5> WOOPS! That username, email, and password combination already exists!!! To see existing username and email combinations please <a href="{{ url_for('bloggers')}}">click here!!</a> <br>
+
+<p>To try again <a href="{{ url_for('index')}}">click here!</a> <p><br> 
+{% endblock %}

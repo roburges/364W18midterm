@@ -7,7 +7,7 @@
 import os
 from flask import Flask, render_template, session, redirect, url_for, flash, request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, ValidationError
+from wtforms import StringField, SubmitField, IntegerField, PasswordField,ValidationError
 from wtforms.validators import Required, Length
 from flask_script import Shell, Manager
 from wtforms.validators import Required, Length # Here, too
@@ -25,9 +25,10 @@ app.use_reloader = True
 
 ## All app.config values
 app.config['SECRET_KEY'] = 'hard to guess string'
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:Soulfood123@localhost:5432/midterm" # TODO: May need to change this, Windows users -- probably by adding postgres:YOURTEXTPW@localhost instead of just localhost. Or just like you did in section or lecture before! Everyone will need to have created a db with exactly this name, though.
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:Soulfood123@localhost:5432/test3" # TODO: May need to change this, Windows users -- probably by adding postgres:YOURTEXTPW@localhost instead of just localhost. Or just like you did in section or lecture before! Everyone will need to have created a db with exactly this name, though.
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 ## Statements for db setup (and manager setup if using Manager)
 manager = Manager(app)
@@ -47,39 +48,52 @@ db = SQLAlchemy(app)
 
 class Blog(db.Model):
     __tablename__ = "blogs"
-    ID = db.Column(db.Integer,primary_key=True)
+    id = db.Column(db.Integer,primary_key=True)
     blog = db.Column(db.String(256))
     date = db.Column(db.String(10))
-    tickers_id = db.Column(db.Integer, db.ForeignKey('tickers.ID'))
+    tickers_id = db.Column(db.Integer, db.ForeignKey('tickers.id'))
+    names_id=db.Column(db.Integer, db.ForeignKey('names.id'))
 
     def __repr__(self):
-        return "{Blog %r} (ID: {%a})".format(self.blog, self.ID)
+        return "{blog %r} (ID: {%a})".format(self.blog, self.id)
 
 
 class Ticker(db.Model):
     __tablename__ = "tickers"
-    ID = db.Column(db.Integer,primary_key=True)
+    id = db.Column(db.Integer,primary_key=True)
     tickerD = db.Column(db.String(64))
-
+    blogr=db.relationship('Blog',backref='Ticker')
     def __repr__(self):
-        return "{tickerD %r} | ID: {%a})".format(self.tickerD, self.ID)
+        return "{tickerD %r} | ID: {%a})".format(self.tickerD, self.id)
 
 class Name(db.Model):
-    __tablename__ = "name"
-    ID = db.Column(db.Integer,primary_key=True)
+    __tablename__ = "names"
+    id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String(64))
+    passwords_id=db.Column(db.Integer, db.ForeignKey('passwords.id'))
 
     def __repr__(self):
-        return "{username %r} | ID: {%a})".format(self.username, self.ID)
+        return "{username %r} | ID: {%a})".format(self.username, self.id)
+
+class Password(db.Model):
+    __tablename__="passwords"
+    id=db.Column(db.Integer,primary_key=True)
+    pword=db.Column(db.String)
+    email=db.Column(db.String)
+    namer=db.relationship('Name', backref='Password')
+    def __repr__(self):
+        return "{pword %r} | ID: {%a})".format(self.pword, self.id)
 
 
 ###################
 ###### FORMS ######
 ###################
 
+
+
 class BlogForm(FlaskForm):
 
-    username = StringField('Enter your name:', validators=[Required(),Length(1,280)])
+    username = StringField('Enter your username:', validators=[Required(),Length(1,280)])
     tickers = StringField('Enter a stock you have information on:', validators=[Required(),Length(1,280)])
     date= StringField('Enter a date for a quote to display (YYYY-MM-DD, up to 18 years):', validators=[Required(),Length(10)])
     blog = StringField("Enter your information here (below 10,000 words):", validators=[Required(),Length(10,10000)])
@@ -89,6 +103,11 @@ class BlogForm(FlaskForm):
         if form.tickers.data.isdigit():
             raise ValidationError("Ticker cannot contain numbers")
 
+class LoginForm(FlaskForm):
+    username = StringField('Enter your existing Username or create one',validators=[Required(), Length(1,20)])
+    pword = PasswordField('Enter your existing Password or create one',validators=[Required(),Length(1,25)])
+    email= StringField('Please Enter a valid email:', validators=[Required()])
+    submit = SubmitField('Log in or Create account')
 
 
 
@@ -100,12 +119,17 @@ class BlogForm(FlaskForm):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html')
+
+
 ##num_blogs code from lecture
 @app.route('/')
 def index():
-    form = BlogForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
+    form = LoginForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
     num_blogs = len(Blog.query.all())
-    return render_template('index.html',form=form)
+    return render_template('signup.html',form=form)
+
+
+
 
 @app.route('/home', methods=['GET', 'POST'])
 def home():
@@ -123,30 +147,50 @@ def home():
             db.session.add(t)
             db.session.commit()
 
-        n = Name.query.filter_by(username=username).first()
 
-        if n:
-            print ("Name exists")
-        else:
-            n = Name(username=username)
-            db.session.add(n)
-            db.session.commit()
-
-        i = Blog.query.filter_by(date=date,blog=blog).first()
-        if i:
+        b = Blog.query.filter_by(date=date,blog=blog).first()
+        if b:
             print("blog already exists")
+            response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+tickers+"&outputsize=full&apikey=14NNDSABY00229XX")
+            results = json.loads(response.text)
+            final=results['Time Series (Daily)'][date]['2. high']
+            final_low=results['Time Series (Daily)'][date]['3. low']
             return redirect(url_for('blogs'))
         else:
-            ie = Blog(date=date,blog=blog)
-            db.session.add(ie)
+            b = Blog(date=date,blog=blog)
+            db.session.add(b)
             db.session.commit()
             response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+tickers+"&outputsize=full&apikey=14NNDSABY00229XX")
             results = json.loads(response.text)
             final=results['Time Series (Daily)'][date]['2. high']
             final_low=results['Time Series (Daily)'][date]['3. low']
             # data=pprint(results)
-            return render_template("results.html", tip = blog, tickers = tickers, final = final,final_low=final_low)
+            return render_template("results.html", blog = blog, tickers = tickers, final = final,final_low=final_low)
+            def login():
+                    form=LoginForm(request.form)
 
+                    n = Name.query.filter_by(username=username, pword=pword, email=email).first()
+
+                    if n:
+                        print ("username, password, email combo exists")
+                        redirect(url_for('comboexists'))
+                    else:
+                        n = Name(username=username)
+                        db.session.add(n)
+                        db.session.commit()
+
+                    na= Name.query.filter_by(username=username).all()
+
+                    if na:
+                        print("username exists but still usable per requirement")
+                        db.session.add(na)
+                        db.session.commit()
+                    else:
+                        print('adding')
+                        db.session.add(na)
+                        db.session.commit()
+        n = Name.query.filter_by(username=username, pword=pword, email=email).first()
+        login(n)
 ##below code from lecture/HW3
     errors = [v for v in form.errors.values()]
     if len(errors) > 0:
@@ -155,21 +199,26 @@ def home():
 
     return render_template("index.html", form = form )
 
+
+@app.route('/comboexists')
+def comboexists():
+    return render_template('comboexists.html')
 @app.route('/bloggers')
 def bloggers():
-    names = Name.query.all()
-    return render_template('people.html',names=names)
+    names = Name.query.filter_by(username=username)
+    return render_template('people.html',username=username)
 
 @app.route('/blogs')
 def blogs():
     blogs = Blog.query.all()
-    tickers = [(b, Ticker.query.filter_by(ID=b.ID).first()) for b in blogs]
-    return render_template('stockinfo.html', blogs=tickers)
+    tickers = [(b, Ticker.query.filter_by(id=b.id).first()) for b in blogs]
+    return render_template('stockinfo.html', blogs=tickers, blog = blog, tickers = tickers, final = final,final_low=final_low, name=name, username=username)
 
 @app.route('/tickers')
 def tickers():
     tickers = Ticker.query.all()
     return render_template('allstocks.html', tickers=tickers)
+
 
 
 @app.errorhandler(404)
