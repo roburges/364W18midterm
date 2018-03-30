@@ -1,0 +1,13 @@
+{% block content %}
+
+{% endblock %}
+
+<p>------------</p>
+<h3>Navigation</h3>
+<ul>
+    <li><a href="{{ url_for('home')}}">Go Home (blogging screen).</a></li>
+    <li><a href="{{ url_for('login')}}">Go to login page.</a></li>
+    <li><a href="{{ url_for('bloggers')}}">See all bloggers.</a></li>
+    <li><a href="{{ url_for('blogs')}}">See all stock blogs.</a></li>
+    <li><a href="{{ url_for('tickers')}}">See all tickers that have been blogged about.</a></li>
+</ul>
